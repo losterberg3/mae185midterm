@@ -333,6 +333,22 @@ end
 
 
 
+
+function sol = ddy_bwd(f,dy)
+    [x,y]=size(f);
+    sol=zeros(x,y);
+    f=flip(f,1);
+    for i=1:x
+        for j=1:y
+            if j<y
+                sol(i,j)=(f(i,j+1)-f(i,j))/dy;
+            else
+                sol(i,j)=sol(i,j-1);
+            end
+        end
+    end
+    sol=flip(sol,1);
+end
 function sol = ddy_bwd(f,dy)
     if ndims(f)==3
         [n,x,y]=size(f);
@@ -342,14 +358,14 @@ function sol = ddy_bwd(f,dy)
             for i=1:x
                 for j=1:y
                     if i<x
-                        sol(k,i,j)=(f(k,i,j+1)-f(k,i,j))/dy;
+                        sol(k,i,j)=(f(k,i+1,j)-f(k,i,j))/dx;
                     else
-                        sol(k,i,j)=sol(k,i,j-1);
+                        sol(k,i,j)=sol(k,i-1,j);
                     end
                 end
             end
             SOL=squeeze(sol(k,:,:));
-            sol(k,:,:)=flip(SOL,1);
+            sol(k,:,:)=flip(SOL,2);
         end
     else      
         [x,y]=size(f);
@@ -358,12 +374,12 @@ function sol = ddy_bwd(f,dy)
         for i=1:x
             for j=1:y
                 if i<x
-                    sol(i,j)=(f(i,j+1)-f(i,j))/dy;
+                    sol(i,j)=(f(i+1,j)-f(i,j))/dx;
                 else
-                    sol(i,j)=sol(i,j-1);
+                    sol(i,j)=sol(i-1,j);
                 end
             end
         end
-        sol=flip(sol,1);
+        sol=flip(sol,2);
     end
 end

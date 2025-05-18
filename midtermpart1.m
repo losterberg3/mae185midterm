@@ -1,9 +1,8 @@
 %defining variables
 L=10^-5;
-H=8*10^-5;
+H=8*10^-6;
 nx=75;
 ny=80;
-dt=2.35*10^-11;
 cp=1005;
 cv=718;
 R=cp-cv;
@@ -46,7 +45,11 @@ F=zeros(nx,ny,4);
 
 count=0;
 figure
-while t<1
+while count<10000
+    vp=max(4/3.*mu.*gamma.*mu./Pr./rho,[],'all');
+    dt=(abs(u)/dx + abs(v)/dy + sqrt(gamma.*R.*T.*(dx^-2 + dy^-2))+ 2*vp*(dx^-2 + dy^-2)).^-1;
+    dt=min(dt,[],'all');
+    
     %predictor step, fwd FD for x and y
 
     %For E, tau gets backward in x, central in y
@@ -105,20 +108,28 @@ while t<1
     v(1,:)=0;
     v(:,ny)=0;
 
-    %at the leading edge
-    u(1,1)=0;
-    p(1,1)=pinf;
-    T(1,1)=Tinf;
-
     %at the wall
     u(:,1)=0;
     v(:,1)=0;
     T(:,1)=Tinf;
     p(:,1)=2*p(:,3)-p(:,2);
 
+    %at the leading edge
+    u(1,1)=0;
+    p(1,1)=pinf;
+    T(1,1)=Tinf;
+
+    %clamping these values
+    T = max(T, 1e-3);
+    p = max(p, 1e-3);
+
     rho=p./R./T;
     mu=sutherland(T);
     k=cp/Pr.*mu;
+
+    if any(T(:) <= 0)
+        error('Negative or zero temperature encountered!');
+    end
 
     %now converting these boundary conditions to reflect in Ubar
     Ubar=prim2cons(rho,u,v,T,cv);
@@ -181,21 +192,29 @@ while t<1
     v(1,:)=0;
     v(:,ny)=0;
 
-    %at the leading edge
-    u(1,1)=0;
-    p(1,1)=pinf;
-    T(1,1)=Tinf;
-
     %at the wall
     u(:,1)=0;
     v(:,1)=0;
     T(:,1)=Tinf;
     p(:,1)=2*p(:,3)-p(:,2);
 
+    %at the leading edge
+    u(1,1)=0;
+    p(1,1)=pinf;
+    T(1,1)=Tinf;
+    
+    %clamping these values
+    T = max(T, 1e-3);
+    p = max(p, 1e-3);
+
     rho=p./R./T;
     mu=sutherland(T);
     k=cp/Pr.*mu;
-    
+
+    if any(T(:) <= 0)
+        error('Negative or zero temperature encountered!');
+    end
+
     %update conservative variables with the new primitive variables
     U=prim2cons(rho,u,v,T,cv);
     Et=U(:,:,4);
@@ -210,26 +229,32 @@ while t<1
     Et=real(Et);
 
     t=t+dt;
-    %if mod(count,10)==0 || count==0
+    if mod(count,50)==0 || count==0
         tiledlayout(2,2)
         nexttile
-        pcolor(x,y,u)
+        pcolor(x,y,u), shading interp, axis equal tight;
+        grid off
         title('u')
         colorbar
         nexttile
-        pcolor(x,y,v)
+        pcolor(x,y,v), shading interp, axis equal tight;
+        grid off
         title('v')
         colorbar
         nexttile
-        pcolor(x,y,p)
+        pcolor(x,y,p), shading interp, axis equal tight;
+        grid off
         title('p')
         colorbar
+        caxis([0 101300])
         nexttile
-        pcolor(x,y,T)
+        pcolor(x,y,T), shading interp, axis equal tight;
+        grid off
         title('T')
         colorbar
+        caxis([0 300])
         drawnow
-    %end
+    end
     count=count+1;
 end
 
@@ -291,33 +316,28 @@ function sol = ddx_bwd(f,dx)
         [x,y,n]=size(f);
         sol=zeros(x,y,n);
         for k=1:n
-            fk=flip(squeeze(f(:,:,k)),2);
             for i=1:x
                 for j=1:y
-                    if i<x
-                        sol(i,j,k)=(fk(i+1,j)-fk(i,j))/dx;
+                    if i>1
+                        sol(i,j,k)=(f(i,j,k)-f(i-1,j,k))/dx;
                     else
-                        sol(i,j,k)=sol(i-1,j,k);
+                        sol(i,j,k)=(f(i+1,j,k)-f(i,j,k))/dx;
                     end
                 end
             end
-            SOL=squeeze(sol(:,:,k));
-            sol(:,:,k)=flip(SOL,2);
         end
     else      
         [x,y]=size(f);
         sol=zeros(x,y);
-        f=flip(f,2);
         for i=1:x
-            for j=1:y
-                if i<x
+            for j=1:y 
+                if i>1                       
+                    sol(i,j)=(f(i,j)-f(i-1,j))/dx;                    
+                else                       
                     sol(i,j)=(f(i+1,j)-f(i,j))/dx;
-                else
-                    sol(i,j)=sol(i-1,j);
                 end
             end
         end
-        sol=flip(sol,2);
     end
 end
 
@@ -454,32 +474,27 @@ function sol = ddy_bwd(f,dy)
         [x,y,n]=size(f);
         sol=zeros(x,y,n);
         for k=1:n
-            fk=flip(squeeze(f(:,:,k)),2);
             for i=1:x
                 for j=1:y
-                    if j<y
-                        sol(i,j,k)=(fk(i,j+1)-fk(i,j))/dy;
+                    if j>1
+                        sol(i,j,k)=(f(i,j,k)-f(i,j-1,k))/dy;
                     else
-                        sol(i,j,k)=sol(i,j-1,k);
+                        sol(i,j,k)=(f(i,j+1,k)-f(i,j,k))/dy;
                     end
                 end
             end
-            SOL=squeeze(sol(:,:,k));
-            sol(:,:,k)=flip(SOL,1);
         end
     else      
         [x,y]=size(f);
         sol=zeros(x,y);
-        f=flip(f,2);
         for i=1:x
-            for j=1:y
-                if j<y
+            for j=1:y 
+                if j>1                       
+                    sol(i,j)=(f(i,j)-f(i,j-1))/dy;                    
+                else                       
                     sol(i,j)=(f(i,j+1)-f(i,j))/dy;
-                else
-                    sol(i,j)=sol(i,j-1);
                 end
             end
         end
-        sol=flip(sol,1);
     end
 end

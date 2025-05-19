@@ -20,6 +20,9 @@ T=zeros(size(x));
 p=zeros(size(x));
 
 T(:,:)=Tinf;
+%for convergence plot
+T_old = Tinf;
+
 p(:,:)=pinf;
 u(:,:)=uinf;
 
@@ -37,9 +40,9 @@ F=zeros(nx,ny,4);
 
 count=0;
 i=1;
+
 figure(1)
-while count<10000
-    T_old = T; %for convergence plot
+while count<500
     vp=max(4/3.*mu.*gamma.*mu./Pr./rho,[],'all');
     dt=(abs(u)/dx + abs(v)/dy + sqrt(gamma.*R.*T.*(dx^-2 + dy^-2))+ 2*vp*(dx^-2 + dy^-2)).^-1;
     dt=min(dt,[],'all');
@@ -216,8 +219,8 @@ while count<10000
     u=real(u);
     v=real(v);
     T=real(T);
-    T_res = T-T_old;
-    convergence(i) = norm(T_res(:),2); %ELEPHANT
+    convergence(i) = norm(T-T_old,2); %ELEPHANT
+    T_old = T; %update prev step
     p=real(p);
     k=real(k);
     mu=real(mu);
@@ -225,7 +228,8 @@ while count<10000
     Et=real(Et);
     t=t+dt;
     i=i+1;
-    if mod(count,50)==0 || count==0
+    if mod(count,10)==0 || count==0
+        figure(1);
         tiledlayout(2,3)
         nexttile %plot rho
         pcolor(x,y,rho), shading interp, axis equal tight;
@@ -282,11 +286,20 @@ while count<10000
         % drawnow
 
     end
+    
     count=count+1;
+
+    if mod(count, 10) == 0
+        figure(2);
+        clf;
+        plot(1:count, convergence, 'r-');
+        %fprintf('Step %d: residual = %.6f\n', i, convergence(i));
+        title('Convergence of Temperature');
+        xlabel('Iteration'); ylabel('Residual');
+        drawnow;
+    end
+
 end
-figure(2);
-plot(1:count,convergence,'-');
-title('Temperature Convergence on Steady State');
 
 %% FUNCTIONS
 

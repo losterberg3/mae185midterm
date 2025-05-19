@@ -4,9 +4,11 @@ clear; clc; close all;
 L=10^-5;H=8*10^-6;nx=75;ny=80;
 cp=1005;cv=718;R=cp-cv;
 gamma=cp/cv;Pr=0.71;Tinf=288.15;pinf=101300;rho0=1.225;M=4;
-a0=sqrt(gamma*R*Tinf);
+a0=sqrt(gamma*R*Tinf); % speed of sound
 uinf=M*a0;
-t=0;
+t=0; 
+%add variables for midterm part 2.1
+beta = 0.8; kappa = 10;
 
 %creating grid
 [x,y]=ndgrid(0:L/(nx-1):L,0:H/(ny-1):H);
@@ -22,7 +24,7 @@ p=zeros(size(x));
 T(:,:)=Tinf;
 %for convergence plot
 T_old = Tinf;
-
+u_old = u;
 p(:,:)=pinf;
 u(:,:)=uinf;
 
@@ -42,7 +44,7 @@ count=0;
 i=1;
 
 figure(1)
-while count<500
+while count<1500
     vp=max(4/3.*mu.*gamma.*mu./Pr./rho,[],'all');
     dt=(abs(u)/dx + abs(v)/dy + sqrt(gamma.*R.*T.*(dx^-2 + dy^-2))+ 2*vp*(dx^-2 + dy^-2)).^-1;
     dt=min(dt,[],'all');
@@ -192,7 +194,7 @@ while count<500
     %at the wall
     u(:,1)=0;
     v(:,1)=0;
-    T(:,1)=Tinf;
+    T(:,1)=Tinf; %constant temperature wall
     p(:,1)=2*p(:,3)-p(:,2);
 
     %at the leading edge
@@ -219,29 +221,47 @@ while count<500
     u=real(u);
     v=real(v);
     T=real(T);
-    convergence(i) = norm(T-T_old,2); %ELEPHANT
+    convergence_T(i) = norm(T-T_old,2)/norm(T);
+    convergence_u(i) = norm(u-u_old,2)/norm(u); %ELEPHANT
+    u_old = u;
     T_old = T; %update prev step
     p=real(p);
     k=real(k);
     mu=real(mu);
     rho=real(rho);
+    %schlieren phtography
+    drho_dx = ddx_bwd(rho,dx);  % compute gradients
+    drho_dy = ddy_bwd(rho,dy);
+
+    curl_rho = sqrt(drho_dx.^2 + drho_dy.^2); %calculate curl of rho
+    S = beta*exp(-kappa*(abs(curl_rho)/abs(max(max(curl_rho))))); %calculate schlieren photography
+    %calculate Mach Angle
+    M_theta = asin(1/M);
+    M_theta1 = asin(a0/max(max(u(1,:))));
+    M_theta2 = 0;
+
     Et=real(Et);
     t=t+dt;
     i=i+1;
-    if mod(count,10)==0 || count==0
-        figure(1);
-        tiledlayout(2,3)
+    if mod(count,50)==0 || count==0
+        figure(1); grid off
+        tiledlayout(2,4)
         nexttile %plot rho
         pcolor(x,y,rho), shading interp, axis equal tight;
-        grid off
         title('\rho')
         colorbar
         lim = caxis;
         caxis(lim);
 
+        nexttile %plot Schlieren Photography [S(x,y)]
+        pcolor(x,y,S), colormap(gray),shading interp, axis equal tight;
+        title('Numerical Schlieren Image');
+        colorbar
+        lim = caxis;
+        caxis(lim);
+
         nexttile %plot u
-        pcolor(x,y,u), shading interp, axis equal tight;
-        grid off
+        pcolor(x,y,u), colormap(parula), shading interp, axis equal tight;
         title('u')
         colorbar
         lim = caxis;
@@ -249,7 +269,6 @@ while count<500
 
         nexttile %plot v
         pcolor(x,y,v), shading interp, axis equal tight;
-        grid off
         title('v')
         colorbar
         lim = caxis;
@@ -257,7 +276,6 @@ while count<500
 
         nexttile %plot Et
         pcolor(x,y,Et), shading interp, axis equal tight;
-        grid off
         title('Et')
         colorbar
         lim = caxis;
@@ -265,7 +283,6 @@ while count<500
 
         nexttile %plot p
         pcolor(x,y,p), shading interp, axis equal tight;
-        grid off
         title('p')
         colorbar
         lim = caxis;
@@ -273,31 +290,33 @@ while count<500
 
         nexttile %plot T
         pcolor(x,y,T), shading interp, axis equal tight;
-        grid off
         title('T')
         colorbar
         lim = caxis;
         caxis(lim);
-        % nexttile; hold on; %line plot convergence
-        % plot(i,convergence,'o-'); 
-        drawnow   
-        % 
 
-        % drawnow
+        drawnow   
 
     end
     
     count=count+1;
-
-    if mod(count, 10) == 0
-        figure(2);
-        clf;
-        plot(1:count, convergence, 'r-');
-        %fprintf('Step %d: residual = %.6f\n', i, convergence(i));
-        title('Convergence of Temperature');
-        xlabel('Iteration'); ylabel('Residual');
-        drawnow;
-    end
+% convergence plot
+    % if mod(count, 50) == 0
+    %     figure(2);tiledlayout(2,2);
+    %     nexttile;
+    %     semilogy(1:count, convergence_u, 'r-');
+    %     nexttile;
+    %     plot(1:count, convergence_u, 'r-');
+    %     title('Convergence of velocity');
+    %     xlabel('Iteration'); ylabel('Residual');
+    %     nexttile;
+    %     semilogy(1:count, convergence_T, 'r-');
+    %     nexttile;
+    %     plot(1:count, convergence_T, 'r-');
+    %     title('Convergence of temperature');
+    %     xlabel('Iteration'); ylabel('Residual');
+    %     drawnow;
+    % end
 
 end
 

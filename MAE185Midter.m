@@ -23,7 +23,6 @@ p=zeros(size(x));
 
 T(:,:)=Tinf;
 %for convergence plot
-T_old = Tinf;
 u_old = u;
 p(:,:)=pinf;
 u(:,:)=uinf;
@@ -221,20 +220,22 @@ while count<1500
     u=real(u);
     v=real(v);
     T=real(T);
-    convergence_T(i) = norm(T-T_old,2)/norm(T);
-    convergence_u(i) = norm(u-u_old,2)/norm(u); %ELEPHANT
-    u_old = u;
-    T_old = T; %update prev step
+    %what is happening
+    abs_change_u(i) = abs(norm(u - u_old, 2));         % raw change
+    rel_change_u(i) = norm(u - u_old, 2) / norm(u); %normalized residual
+    convergence_u(i) = norm(u - u_old, 'inf');  %verification
+    u_old = u; %update prev step
     p=real(p);
     k=real(k);
     mu=real(mu);
     rho=real(rho);
-    %schlieren phtography
+    %schlieren photography
     drho_dx = ddx_bwd(rho,dx);  % compute gradients
     drho_dy = ddy_bwd(rho,dy);
 
     curl_rho = sqrt(drho_dx.^2 + drho_dy.^2); %calculate curl of rho
     S = beta*exp(-kappa*(abs(curl_rho)/abs(max(max(curl_rho))))); %calculate schlieren photography
+    
     %calculate Mach Angle
     M_theta = asin(1/M);
     M_theta1 = asin(a0/max(max(u(1,:))));
@@ -245,7 +246,7 @@ while count<1500
     i=i+1;
     if mod(count,50)==0 || count==0
         figure(1); grid off
-        tiledlayout(2,4)
+        tiledlayout(2,3)
         nexttile %plot rho
         pcolor(x,y,rho), shading interp, axis equal tight;
         title('\rho')
@@ -253,12 +254,12 @@ while count<1500
         lim = caxis;
         caxis(lim);
 
-        nexttile %plot Schlieren Photography [S(x,y)]
-        pcolor(x,y,S), colormap(gray),shading interp, axis equal tight;
-        title('Numerical Schlieren Image');
-        colorbar
-        lim = caxis;
-        caxis(lim);
+        % nexttile
+        % pcolor(x,y,S),shading interp, axis equal tight;colormap(gray);
+        % title('Numerical Schlieren Image');
+        % colorbar
+        % lim = caxis;
+        % caxis(lim);
 
         nexttile %plot u
         pcolor(x,y,u), colormap(parula), shading interp, axis equal tight;
@@ -298,26 +299,25 @@ while count<1500
         drawnow   
 
     end
-    
     count=count+1;
-% convergence plot
-    % if mod(count, 50) == 0
-    %     figure(2);tiledlayout(2,2);
-    %     nexttile;
-    %     semilogy(1:count, convergence_u, 'r-');
-    %     nexttile;
-    %     plot(1:count, convergence_u, 'r-');
-    %     title('Convergence of velocity');
-    %     xlabel('Iteration'); ylabel('Residual');
-    %     nexttile;
-    %     semilogy(1:count, convergence_T, 'r-');
-    %     nexttile;
-    %     plot(1:count, convergence_T, 'r-');
-    %     title('Convergence of temperature');
-    %     xlabel('Iteration'); ylabel('Residual');
-    %     drawnow;
-    % end
-
+     %plot Schlieren Photography [S(x,y)]
+    if mod(count,50)==0 || count==0
+        figure(2);
+        pcolor(x,y,S),shading interp, axis equal tight;colormap(gray);
+        title('Numerical Schlieren Image');
+        colorbar
+        lim = [0,1];
+        caxis(lim);
+    end
+    %plot residuals for convergence plot
+    if mod(count,50)==0 || count==0
+        figure(3);
+        semilogy(1:count, rel_change_u(1:count), 'b-', 'LineWidth', 1.5);
+        title('Convergence of velocity U toward Steady State');
+        xlabel('Iteration'); ylabel('Normalized Residual');
+        drawnow;
+    end
+    
 end
 
 %% FUNCTIONS

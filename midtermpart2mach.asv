@@ -274,18 +274,18 @@ ylabel('Residual')
 
 %calculate Mach Angle
 M_theta = asin(1/M);
-M_theta1 = asin(a0/max(max(u(1,:))));
+M_theta1 = asin(a0/max(u(1,:)));
     
 [gx,gy] = gradient(rho ,dx,dy);
 G       = hypot(gx,gy);
 
 % choose two x-rows where the shock is still straight
-iA =  round(0.10*nx);            % 5 % of plate length
-iB =  round(0.35*nx);            % 20 % of plate length
+iA =  round(0.05*nx);            % 5 % of plate length
+iB =  round(0.2*nx);            % 20 % of plate length
 
 % in each row pick the strongest gradient ABOVE the boundary layer
-jA = find(G(iA,7:end)==max(G(iA,5:end)),1,'first') + 6;   % skip first 4 y-cells
-jB = find(G(iB,7i:end)==max(G(iB,5:end)),1,'first') + 6;
+jA = find(G(iA,5:end)==max(G(iA,5:end)),1,'first') + 4;   % skip first 4 y-cells
+jB = find(G(iB,5:end)==max(G(iB,5:end)),1,'first') + 4;
 
 % physical coordinates of those two shock points
 xA = x(iA,jA);   yA = y(iA,jA);

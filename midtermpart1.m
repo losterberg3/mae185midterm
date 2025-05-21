@@ -15,6 +15,7 @@ M=4;
 a0=sqrt(gamma*R*Tinf);
 uinf=M*a0;
 t=0;
+dt=2.35e-11;
 
 %creating grid
 [x,y]=ndgrid(0:L/(nx-1):L,0:H/(ny-1):H);
@@ -26,6 +27,12 @@ u=zeros(size(x));
 v=zeros(size(x));
 T=zeros(size(x));
 p=zeros(size(x));
+
+%for convergence plot
+T_old = Tinf;
+u_old = u;
+convergence_T=zeros(1,1500);
+convergence_u=zeros(1,1500);
 
 T(:,:)=Tinf;
 p(:,:)=pinf;
@@ -41,14 +48,14 @@ Et=U(:,:,4);
 E=zeros(nx,ny,4);
 F=zeros(nx,ny,4);
 
-%% while loop
+% while loop
 
 count=0;
 figure
-while count<10000
-    vp=max(4/3.*mu.*gamma.*mu./Pr./rho,[],'all');
-    dt=(abs(u)/dx + abs(v)/dy + sqrt(gamma.*R.*T.*(dx^-2 + dy^-2))+ 2*vp*(dx^-2 + dy^-2)).^-1;
-    dt=min(dt,[],'all');
+while count<1500
+    %vp=max(4/3.*mu.*gamma.*mu./Pr./rho,[],'all');
+    %dt=(abs(u)/dx + abs(v)/dy + sqrt(gamma.*R.*T.*(dx^-2 + dy^-2))+ 2*vp*(dx^-2 + dy^-2)).^-1;
+    %dt=min(dt,[],'all');
     
     %predictor step, fwd FD for x and y
 
@@ -65,7 +72,6 @@ while count<10000
     E(:,:,2)=rho.*u.^2+p-tauxx;
     E(:,:,3)=rho.*u.*v-tauxy;
     E(:,:,4)=(Et+p).*u-u.*tauxx-v.*tauxy+qdotx;
-    E=real(E);
 
     %For F, tau gets central in x, backwards in y
 
@@ -80,8 +86,7 @@ while count<10000
     F(:,:,2)=rho.*u.*v-tauxy;
     F(:,:,3)=rho.*v.^2+p-tauyy;
     F(:,:,4)=(Et+p).*v-v.*tauyy-u.*tauxy+qdoty;
-    F=real(F);
-
+  
     %the predictor step calculation, fwd and bwd difference functions account for 3D arrays E and F
 
     Ubar=U-dt*(ddx_fwd(E,dx)+ddy_fwd(F,dy));
@@ -91,12 +96,6 @@ while count<10000
     [~,u,v,T,p,~,~] = cons2prim(Ubar,R,cv);
 
     %ENFORCE BCs
-
-    %at the outflow
-    u(nx,:)=2*u(nx-2,:)-u(nx-1,:);
-    v(nx,:)=2*v(nx-2,:)-v(nx-1,:);
-    p(nx,:)=2*p(nx-2,:)-p(nx-1,:);
-    T(nx,:)=2*T(nx-2,:)-T(nx-1,:);
 
     %at the inflow and far-field
     u(1,:)=uinf;
@@ -112,24 +111,22 @@ while count<10000
     u(:,1)=0;
     v(:,1)=0;
     T(:,1)=Tinf;
-    p(:,1)=2*p(:,3)-p(:,2);
+    p(:,1)=2*p(:,2)-p(:,3);
 
     %at the leading edge
     u(1,1)=0;
     p(1,1)=pinf;
     T(1,1)=Tinf;
 
-    %clamping these values
-    T = max(T, 1e-3);
-    p = max(p, 1e-3);
+    %at the outflow
+    u(nx,:)=2*u(nx-1,:)-u(nx-2,:);
+    v(nx,:)=2*v(nx-1,:)-v(nx-2,:);
+    p(nx,:)=2*p(nx-1,:)-p(nx-2,:);
+    T(nx,:)=2*T(nx-1,:)-T(nx-2,:);
 
     rho=p./R./T;
     mu=sutherland(T);
     k=cp/Pr.*mu;
-
-    if any(T(:) <= 0)
-        error('Negative or zero temperature encountered!');
-    end
 
     %now converting these boundary conditions to reflect in Ubar
     Ubar=prim2cons(rho,u,v,T,cv);
@@ -150,7 +147,6 @@ while count<10000
     E(:,:,2)=(rho.*(u.^2))+p-tauxx;
     E(:,:,3)=(rho.*u.*v)-tauxy;
     E(:,:,4)=(Et+p).*u-(u.*tauxx)-v.*tauxy+qdotx;
-    E=real(E);
 
     %For Fbar, tau gets central in x, forward in y
 
@@ -165,7 +161,6 @@ while count<10000
     F(:,:,2)=rho.*u.*v-tauxy;
     F(:,:,3)=rho.*v.^2+p-tauyy;
     F(:,:,4)=(Et+p).*v-v.*tauyy-u.*tauxy+qdoty;
-    F=real(F);
 
     %now the corrector step calculation, fwd and bwd difference functions account for 3D arrays E and F
    
@@ -175,12 +170,6 @@ while count<10000
     [~,u,v,T,p,~,~] = cons2prim(U,R,cv);
 
     %ENFORCE BCs
-
-    %at the outflow
-    u(nx,:)=2*u(nx-2,:)-u(nx-1,:);
-    v(nx,:)=2*v(nx-2,:)-v(nx-1,:);
-    p(nx,:)=2*p(nx-2,:)-p(nx-1,:);
-    T(nx,:)=2*T(nx-2,:)-T(nx-1,:);
 
     %at the inflow and far-field
     u(1,:)=uinf;
@@ -196,80 +185,88 @@ while count<10000
     u(:,1)=0;
     v(:,1)=0;
     T(:,1)=Tinf;
-    p(:,1)=2*p(:,3)-p(:,2);
+    p(:,1)=2*p(:,2)-p(:,3);
+
+    %at the outflow
+    u(nx,:)=2*u(nx-1,:)-u(nx-2,:);
+    v(nx,:)=2*v(nx-1,:)-v(nx-2,:);
+    p(nx,:)=2*p(nx-1,:)-p(nx-2,:);
+    T(nx,:)=2*T(nx-1,:)-T(nx-2,:);
 
     %at the leading edge
     u(1,1)=0;
     p(1,1)=pinf;
     T(1,1)=Tinf;
     
-    %clamping these values
-    T = max(T, 1e-3);
-    p = max(p, 1e-3);
-
     rho=p./R./T;
+    e=cv*T;
     mu=sutherland(T);
     k=cp/Pr.*mu;
-
-    if any(T(:) <= 0)
-        error('Negative or zero temperature encountered!');
-    end
 
     %update conservative variables with the new primitive variables
     U=prim2cons(rho,u,v,T,cv);
     Et=U(:,:,4);
 
-    u=real(u);
-    v=real(v);
-    T=real(T);
-    p=real(p);
-    k=real(k);
-    mu=real(mu);
-    rho=real(rho);
-    Et=real(Et);
+    %convergence plot
+    convergence_T(1,count+1) = norm(T-T_old,2)/norm(T);
+    T_old = T; %update prev step
 
     t=t+dt;
-    if mod(count,50)==0 || count==0
-        tiledlayout(2,2)
-        nexttile
+    if mod(count,100)==0 || count==0
+        tiledlayout(2,3)
+        ax1=nexttile;
+        pcolor(x,y,rho), shading interp, axis equal tight;
+        grid off
+        title('\rho [kg/m^3]')
+        colormap(ax1,'jet');
+        colorbar
+        caxis([1.1 3.5])
+        ax2=nexttile;
         pcolor(x,y,u), shading interp, axis equal tight;
         grid off
-        title('u')
+        title('u [m/s]')
+        colormap(ax2,'jet');
         colorbar
-        nexttile
+        caxis([0 1350])
+        ax3=nexttile;
         pcolor(x,y,v), shading interp, axis equal tight;
         grid off
-        title('v')
+        title('v [m/s]')
+        colormap(ax3,'jet');
         colorbar
-        nexttile
+        caxis([0 175])
+        ax4=nexttile;
+        pcolor(x,y,e), shading interp, axis equal tight;
+        grid off
+        title('e [J/kg]')
+        colormap(ax4,'jet');
+        colorbar
+        caxis([210000 350000])
+        ax5=nexttile;
         pcolor(x,y,p), shading interp, axis equal tight;
         grid off
-        title('p')
+        title('P [Pa]')
+        colormap(ax5,'jet');
         colorbar
-        caxis([0 101300])
-        nexttile
+        caxis([110000 280000])
+        ax6=nexttile;
         pcolor(x,y,T), shading interp, axis equal tight;
         grid off
-        title('T')
+        title('T [K]')
+        colormap(ax6,'hot');
         colorbar
-        caxis([0 300])
+        caxis([290 490])
         drawnow
     end
     count=count+1;
 end
+%% 
 
-
-
-
-
-
-
-
-
-
-
-
-
+figure
+plot(dt*(1:1500),convergence_T)
+title('Convergence for T')
+xlabel('Time [s]')
+ylabel('Residual')
 
 % FUNCTIONS
 

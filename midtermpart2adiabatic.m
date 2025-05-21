@@ -67,6 +67,7 @@ while count<1500
     %For E, qdotx gets backward in x
 
     qdotx=-k.*ddx_bwd(T,dx);
+    %qdotx(:,1)=0; %adiabatic wall condition
 
     E(:,:,1)=rho.*u;
     E(:,:,2)=rho.*u.^2+p-tauxx;
@@ -81,6 +82,7 @@ while count<1500
     %For F, qdoty gets backward in y
 
     qdoty=-k.*ddy_bwd(T,dy);
+    %qdoty(:,1)=0;  %adiabatic wall condition
 
     F(:,:,1)=rho.*v;
     F(:,:,2)=rho.*u.*v-tauxy;
@@ -110,14 +112,13 @@ while count<1500
     %at the wall
     u(:,1)=0;
     v(:,1)=0;
-    T(:,1)=Tinf;
+    T(:,1)=T(:,2);
     p(:,1)=2*p(:,2)-p(:,3);
 
     %at the leading edge
     u(1,1)=0;
     p(1,1)=pinf;
-    T(1,1)=Tinf;
-
+   
     %at the outflow
     u(nx,:)=2*u(nx-1,:)-u(nx-2,:);
     v(nx,:)=2*v(nx-1,:)-v(nx-2,:);
@@ -142,6 +143,7 @@ while count<1500
     %For Ebar, qdotx gets forward in x
 
     qdotx=-k.*ddx_fwd(T,dx);
+    %qdotx(:,1)=0;   %adiabatic wall condition
 
     E(:,:,1)=rho.*u;
     E(:,:,2)=(rho.*(u.^2))+p-tauxx;
@@ -156,6 +158,7 @@ while count<1500
     %For Fbar, qdoty gets forward in y
 
     qdoty=-k.*ddy_fwd(T,dy);
+    %qdoty(:,1)=0; %adiabatic wall condition
 
     F(:,:,1)=rho.*v;
     F(:,:,2)=rho.*u.*v-tauxy;
@@ -184,7 +187,7 @@ while count<1500
     %at the wall
     u(:,1)=0;
     v(:,1)=0;
-    T(:,1)=Tinf;
+    T(:,1)=T(:,2);
     p(:,1)=2*p(:,2)-p(:,3);
 
     %at the outflow
@@ -196,7 +199,6 @@ while count<1500
     %at the leading edge
     u(1,1)=0;
     p(1,1)=pinf;
-    T(1,1)=Tinf;
     
     rho=p./R./T;
     e=cv*T;

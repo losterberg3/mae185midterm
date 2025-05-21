@@ -260,7 +260,6 @@ while count<1500
     end
     count=count+1;
 end
-%% 
 
 figure
 plot(dt*(1:1500),convergence_T)

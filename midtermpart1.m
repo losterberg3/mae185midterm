@@ -30,9 +30,7 @@ p=zeros(size(x));
 
 %for convergence plot
 T_old = Tinf;
-u_old = u;
 convergence_T=zeros(1,1500);
-convergence_u=zeros(1,1500);
 
 T(:,:)=Tinf;
 p(:,:)=pinf;
@@ -53,6 +51,8 @@ F=zeros(nx,ny,4);
 count=0;
 figure
 while count<1500
+    %dt stability requirement (not used)
+
     %vp=max(4/3.*mu.*gamma.*mu./Pr./rho,[],'all');
     %dt=(abs(u)/dx + abs(v)/dy + sqrt(gamma.*R.*T.*(dx^-2 + dy^-2))+ 2*vp*(dx^-2 + dy^-2)).^-1;
     %dt=min(dt,[],'all');

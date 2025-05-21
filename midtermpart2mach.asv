@@ -8,7 +8,8 @@ gamma=cp/cv;Pr=0.71;Tinf=288.15;pinf=101300;rho0=1.225;M=4;
 a0=sqrt(gamma*R*Tinf); % speed of sound
 uinf=M*a0;
 t=0; 
-dt=2.35e-11;
+%add variables for midterm part 2.1
+beta = 0.8; kappa = 10;
 
 %creating grid
 [x,y]=ndgrid(0:L/(nx-1):L,0:H/(ny-1):H);
@@ -194,9 +195,98 @@ while count<1500
     %update conservative variables with the new primitive variables
     U=prim2cons(rho,u,v,T,cv);
     Et=U(:,:,4);
+   
+    
+    
+    %schlieren phtography
+    drho_dx = ddx_bwd(rho,dx);  % compute gradients
+    drho_dy = ddy_bwd(rho,dy);
 
+    curl_rho = sqrt(drho_dx.^2 + drho_dy.^2); %calculate curl of rho
+    S = beta*exp(-kappa*(abs(curl_rho)/abs(max(max(curl_rho))))); %calculate schlieren photography
+
+
+
+    Et=real(Et);
     t=t+dt;
+    i=i+1;
+    if mod(count,500)==0 || count==0
+        figure(1); grid off
+        tiledlayout(2,4)
+        nexttile %plot rho
+        pcolor(x,y,rho), shading interp, axis equal tight;
+        title('\rho')
+        colorbar
+        lim = caxis;
+        caxis(lim);
+
+        nexttile %plot Schlieren Photography [S(x,y)]
+        pcolor(x,y,S), colormap(gray),shading interp, axis equal tight;
+        title('Numerical Schlieren Image');
+        colorbar
+        caxis([0.1 0.8]);
+        colormap(gray);
+        lim = caxis;
+        caxis(lim);
+
+        nexttile %plot u
+        pcolor(x,y,u), colormap(parula), shading interp, axis equal tight;
+        title('u')
+        colorbar
+        lim = caxis;
+        caxis(lim);
+
+        nexttile %plot v
+        pcolor(x,y,v), shading interp, axis equal tight;
+        title('v')
+        colorbar
+        lim = caxis;
+        caxis(lim);
+
+        nexttile %plot Et
+        pcolor(x,y,Et), shading interp, axis equal tight;
+        title('Et')
+        colorbar
+        lim = caxis;
+        caxis(lim);
+
+        nexttile %plot p
+        pcolor(x,y,p), shading interp, axis equal tight;
+        title('p')
+        colorbar
+        lim = caxis;
+        caxis(lim);
+
+        nexttile %plot T
+        pcolor(x,y,T), shading interp, axis equal tight;
+        title('T')
+        colorbar
+        lim = caxis;
+        caxis(lim);
+
+        drawnow   
+
+    end
+    
     count=count+1;
+% convergence plot
+    % if mod(count, 50) == 0
+    %     figure(2);tiledlayout(2,2);
+    %     nexttile;
+    %     semilogy(1:count, convergence_u, 'r-');
+    %     nexttile;
+    %     plot(1:count, convergence_u, 'r-');
+    %     title('Convergence of velocity');
+    %     xlabel('Iteration'); ylabel('Residual');
+    %     nexttile;
+    %     semilogy(1:count, convergence_T, 'r-');
+    %     nexttile;
+    %     plot(1:count, convergence_T, 'r-');
+    %     title('Convergence of temperature');
+    %     xlabel('Iteration'); ylabel('Residual');
+    %     drawnow;
+    % end
+
 end
 
     %calculate Mach Angle

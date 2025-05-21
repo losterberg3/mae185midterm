@@ -82,7 +82,7 @@ while count<1500
     %For F, qdoty gets backward in y
 
     qdoty=-k.*ddy_bwd(T,dy);
-    %qdoty(:,1)=0;  %adiabatic wall condition
+    qdoty(:,1)=0;  %adiabatic wall condition
 
     F(:,:,1)=rho.*v;
     F(:,:,2)=rho.*u.*v-tauxy;
@@ -112,7 +112,7 @@ while count<1500
     %at the wall
     u(:,1)=0;
     v(:,1)=0;
-    T(:,1)=T(:,2);
+    T(:,1)=T(:,2); %adiabatic wall condition
     p(:,1)=2*p(:,2)-p(:,3);
 
     %at the leading edge
@@ -158,7 +158,7 @@ while count<1500
     %For Fbar, qdoty gets forward in y
 
     qdoty=-k.*ddy_fwd(T,dy);
-    %qdoty(:,1)=0; %adiabatic wall condition
+    qdoty(:,1)=0; %adiabatic wall condition
 
     F(:,:,1)=rho.*v;
     F(:,:,2)=rho.*u.*v-tauxy;
@@ -187,7 +187,7 @@ while count<1500
     %at the wall
     u(:,1)=0;
     v(:,1)=0;
-    T(:,1)=T(:,2);
+    T(:,1)=T(:,2); %adiabatic wall condition
     p(:,1)=2*p(:,2)-p(:,3);
 
     %at the outflow
@@ -257,7 +257,7 @@ while count<1500
         title('T [K]')
         colormap(ax6,'hot');
         colorbar
-        caxis([290 490])
+        caxis([290 1000])
         drawnow
     end
     count=count+1;

@@ -17,7 +17,11 @@ rho0=1.225;
 M=4;
 a0=sqrt(gamma*R*Tinf);
 uinf=M*a0;
+<<<<<<< HEAD
 t=0;
+=======
+t=0; 
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 dt=2.35e-11;
 
 %creating grid
@@ -31,12 +35,15 @@ v=zeros(size(x));
 T=zeros(size(x));
 p=zeros(size(x));
 
+<<<<<<< HEAD
 %for convergence plot
 T_old = Tinf;
 u_old = u;
 convergence_T=zeros(1,1500);
 convergence_u=zeros(1,1500);
 
+=======
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 T(:,:)=Tinf;
 p(:,:)=pinf;
 u(:,:)=uinf;
@@ -52,9 +59,14 @@ E=zeros(nx,ny,4);
 F=zeros(nx,ny,4);
 
 % while loop
+<<<<<<< HEAD
 
 count=0;
 figure
+=======
+count=0;
+
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 while count<1500
     %vp=max(4/3.*mu.*gamma.*mu./Pr./rho,[],'all');
     %dt=(abs(u)/dx + abs(v)/dy + sqrt(gamma.*R.*T.*(dx^-2 + dy^-2))+ 2*vp*(dx^-2 + dy^-2)).^-1;
@@ -91,7 +103,11 @@ while count<1500
     F(:,:,2)=rho.*u.*v-tauxy;
     F(:,:,3)=rho.*v.^2+p-tauyy;
     F(:,:,4)=(Et+p).*v-v.*tauyy-u.*tauxy+qdoty;
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
     %the predictor step calculation, fwd and bwd difference functions account for 3D arrays E and F
 
     Ubar=U-dt*(ddx_fwd(E,dx)+ddy_fwd(F,dy));
@@ -102,6 +118,15 @@ while count<1500
 
     %ENFORCE BCs
 
+<<<<<<< HEAD
+=======
+    %at the outflow
+    u(nx,:)=2*u(nx-1,:)-u(nx-2,:);
+    v(nx,:)=2*v(nx-1,:)-v(nx-2,:);
+    p(nx,:)=2*p(nx-1,:)-p(nx-2,:);
+    T(nx,:)=2*T(nx-1,:)-T(nx-2,:);
+
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
     %at the inflow and far-field
     u(1,:)=uinf;
     u(:,ny)=uinf;
@@ -121,12 +146,16 @@ while count<1500
     %at the leading edge
     u(1,1)=0;
     p(1,1)=pinf;
+<<<<<<< HEAD
    
     %at the outflow
     u(nx,:)=2*u(nx-1,:)-u(nx-2,:);
     v(nx,:)=2*v(nx-1,:)-v(nx-2,:);
     p(nx,:)=2*p(nx-1,:)-p(nx-2,:);
     T(nx,:)=2*T(nx-1,:)-T(nx-2,:);
+=======
+    T(1,1)=Tinf;
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 
     rho=p./R./T;
     mu=sutherland(T);
@@ -177,6 +206,15 @@ while count<1500
 
     %ENFORCE BCs
 
+<<<<<<< HEAD
+=======
+    %at the outflow
+    u(nx,:)=2*u(nx-1,:)-u(nx-2,:);
+    v(nx,:)=2*v(nx-1,:)-v(nx-2,:);
+    p(nx,:)=2*p(nx-1,:)-p(nx-2,:);
+    T(nx,:)=2*T(nx-1,:)-T(nx-2,:);
+
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
     %at the inflow and far-field
     u(1,:)=uinf;
     u(:,ny)=uinf;
@@ -212,6 +250,7 @@ while count<1500
     U=prim2cons(rho,u,v,T,cv);
     Et=U(:,:,4);
 
+<<<<<<< HEAD
     %convergence plot
     convergence_T(1,count+1) = norm(T-T_old,2)/norm(T);
     T_old = T; %update prev step
@@ -272,6 +311,12 @@ title('Convergence for T')
 xlabel('Time [s]')
 ylabel('Residual')
 
+=======
+    t=t+dt;
+    count=count+1;
+end
+
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 %calculate Mach Angle
 M_theta = asin(1/M);
 M_theta1 = asin(a0/max(u(1,:)));
@@ -280,8 +325,13 @@ M_theta1 = asin(a0/max(u(1,:)));
 G       = hypot(gx,gy);
 
 % choose two x-rows where the shock is still straight
+<<<<<<< HEAD
 iA =  round(0.03 *nx);            % 3 % of plate length
 iB =  round(0.15*nx);            % 15 % of plate length
+=======
+iA =  round(0.05*nx);            % 5% of plate length
+iB =  round(0.2*nx);            % 20% of plate length
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 
 % in each row pick the strongest gradient ABOVE the boundary layer
 jA = find(G(iA,6:end)==max(G(iA,5:end)),1,'first') + 5;   % skip first 5 y-cells
@@ -297,6 +347,7 @@ M_theta2 = atan( (yB - yA) / (xB - xA) );
 
 fprintf('Theoretical θ = %.2f°\n', rad2deg(M_theta));
 fprintf('Top-edge estimate θ = %.2f°\n', rad2deg(M_theta1));
+<<<<<<< HEAD
 fprintf('Numerical slope-based θ = %.2f°\n', rad2deg(M_theta2));
 
 
@@ -528,3 +579,6 @@ function sol = ddy_bwd(f,dy)
         end
     end
 end
+=======
+fprintf('Numerical slope-based θ = %.2f°\n', rad2deg(M_theta2));
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed

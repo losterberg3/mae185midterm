@@ -2,6 +2,7 @@
 clear; clc; close all;
 
 %defining variables
+<<<<<<< HEAD
 L=10^-5;
 H=8*10^-6;
 nx=75;
@@ -19,6 +20,16 @@ a0=sqrt(gamma*R*Tinf);
 uinf=M*a0;
 t=0;
 dt=2.35e-11;
+=======
+L=10^-5;H=8*10^-6;nx=75;ny=80;
+cp=1005;cv=718;R=cp-cv;
+gamma=cp/cv;Pr=0.71;Tinf=288.15;pinf=101300;rho0=1.225;M=4;
+a0=sqrt(gamma*R*Tinf); % speed of sound
+uinf=M*a0;
+t=0; 
+%add variables for midterm part 2.1
+beta = 0.8; kappa = 10;
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 
 %creating grid
 [x,y]=ndgrid(0:L/(nx-1):L,0:H/(ny-1):H);
@@ -31,12 +42,15 @@ v=zeros(size(x));
 T=zeros(size(x));
 p=zeros(size(x));
 
+<<<<<<< HEAD
 %for convergence plot
 T_old = Tinf;
 u_old = u;
 convergence_T=zeros(1,1500);
 convergence_u=zeros(1,1500);
 
+=======
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 T(:,:)=Tinf;
 p(:,:)=pinf;
 u(:,:)=uinf;
@@ -54,7 +68,13 @@ F=zeros(nx,ny,4);
 % while loop
 
 count=0;
+<<<<<<< HEAD
 figure
+=======
+i=1;
+
+figure(1)
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 while count<1500
     %vp=max(4/3.*mu.*gamma.*mu./Pr./rho,[],'all');
     %dt=(abs(u)/dx + abs(v)/dy + sqrt(gamma.*R.*T.*(dx^-2 + dy^-2))+ 2*vp*(dx^-2 + dy^-2)).^-1;
@@ -70,7 +90,10 @@ while count<1500
     %For E, qdotx gets backward in x
 
     qdotx=-k.*ddx_bwd(T,dx);
+<<<<<<< HEAD
     %qdotx(:,1)=0; %adiabatic wall condition
+=======
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 
     E(:,:,1)=rho.*u;
     E(:,:,2)=rho.*u.^2+p-tauxx;
@@ -85,13 +108,20 @@ while count<1500
     %For F, qdoty gets backward in y
 
     qdoty=-k.*ddy_bwd(T,dy);
+<<<<<<< HEAD
     %qdoty(:,1)=0;  %adiabatic wall condition
+=======
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 
     F(:,:,1)=rho.*v;
     F(:,:,2)=rho.*u.*v-tauxy;
     F(:,:,3)=rho.*v.^2+p-tauyy;
     F(:,:,4)=(Et+p).*v-v.*tauyy-u.*tauxy+qdoty;
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
     %the predictor step calculation, fwd and bwd difference functions account for 3D arrays E and F
 
     Ubar=U-dt*(ddx_fwd(E,dx)+ddy_fwd(F,dy));
@@ -102,6 +132,15 @@ while count<1500
 
     %ENFORCE BCs
 
+<<<<<<< HEAD
+=======
+    %at the outflow
+    u(nx,:)=2*u(nx-1,:)-u(nx-2,:);
+    v(nx,:)=2*v(nx-1,:)-v(nx-2,:);
+    p(nx,:)=2*p(nx-1,:)-p(nx-2,:);
+    T(nx,:)=2*T(nx-1,:)-T(nx-2,:);
+
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
     %at the inflow and far-field
     u(1,:)=uinf;
     u(:,ny)=uinf;
@@ -115,18 +154,27 @@ while count<1500
     %at the wall
     u(:,1)=0;
     v(:,1)=0;
+<<<<<<< HEAD
     T(:,1)=T(:,2);
     p(:,1)=2*p(:,2)-p(:,3);
+=======
+    T(:,1)=Tinf;
+    p(:,1)=2*p(:,3)-p(:,2);
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 
     %at the leading edge
     u(1,1)=0;
     p(1,1)=pinf;
+<<<<<<< HEAD
    
     %at the outflow
     u(nx,:)=2*u(nx-1,:)-u(nx-2,:);
     v(nx,:)=2*v(nx-1,:)-v(nx-2,:);
     p(nx,:)=2*p(nx-1,:)-p(nx-2,:);
     T(nx,:)=2*T(nx-1,:)-T(nx-2,:);
+=======
+    T(1,1)=Tinf;
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 
     rho=p./R./T;
     mu=sutherland(T);
@@ -146,7 +194,10 @@ while count<1500
     %For Ebar, qdotx gets forward in x
 
     qdotx=-k.*ddx_fwd(T,dx);
+<<<<<<< HEAD
     %qdotx(:,1)=0;   %adiabatic wall condition
+=======
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 
     E(:,:,1)=rho.*u;
     E(:,:,2)=(rho.*(u.^2))+p-tauxx;
@@ -161,7 +212,10 @@ while count<1500
     %For Fbar, qdoty gets forward in y
 
     qdoty=-k.*ddy_fwd(T,dy);
+<<<<<<< HEAD
     %qdoty(:,1)=0; %adiabatic wall condition
+=======
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 
     F(:,:,1)=rho.*v;
     F(:,:,2)=rho.*u.*v-tauxy;
@@ -177,6 +231,15 @@ while count<1500
 
     %ENFORCE BCs
 
+<<<<<<< HEAD
+=======
+    %at the outflow
+    u(nx,:)=2*u(nx-1,:)-u(nx-2,:);
+    v(nx,:)=2*v(nx-1,:)-v(nx-2,:);
+    p(nx,:)=2*p(nx-1,:)-p(nx-2,:);
+    T(nx,:)=2*T(nx-1,:)-T(nx-2,:);
+
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
     %at the inflow and far-field
     u(1,:)=uinf;
     u(:,ny)=uinf;
@@ -190,6 +253,7 @@ while count<1500
     %at the wall
     u(:,1)=0;
     v(:,1)=0;
+<<<<<<< HEAD
     T(:,1)=T(:,2);
     p(:,1)=2*p(:,2)-p(:,3);
 
@@ -198,19 +262,30 @@ while count<1500
     v(nx,:)=2*v(nx-1,:)-v(nx-2,:);
     p(nx,:)=2*p(nx-1,:)-p(nx-2,:);
     T(nx,:)=2*T(nx-1,:)-T(nx-2,:);
+=======
+    T(:,1)=Tinf; %constant temperature wall
+    p(:,1)=2*p(:,3)-p(:,2);
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 
     %at the leading edge
     u(1,1)=0;
     p(1,1)=pinf;
+<<<<<<< HEAD
     
     rho=p./R./T;
     e=cv*T;
+=======
+    T(1,1)=Tinf;
+    
+    rho=p./R./T;
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
     mu=sutherland(T);
     k=cp/Pr.*mu;
 
     %update conservative variables with the new primitive variables
     U=prim2cons(rho,u,v,T,cv);
     Et=U(:,:,4);
+<<<<<<< HEAD
 
     %convergence plot
     convergence_T(1,count+1) = norm(T-T_old,2)/norm(T);
@@ -275,13 +350,117 @@ ylabel('Residual')
 %calculate Mach Angle
 M_theta = asin(1/M);
 M_theta1 = asin(a0/max(u(1,:)));
+=======
+   
+    
+    
+    %schlieren phtography
+    drho_dx = ddx_bwd(rho,dx);  % compute gradients
+    drho_dy = ddy_bwd(rho,dy);
+
+    curl_rho = sqrt(drho_dx.^2 + drho_dy.^2); %calculate curl of rho
+    S = beta*exp(-kappa*(abs(curl_rho)/abs(max(max(curl_rho))))); %calculate schlieren photography
+
+
+
+    Et=real(Et);
+    t=t+dt;
+    i=i+1;
+    if mod(count,500)==0 || count==0
+        figure(1); grid off
+        tiledlayout(2,4)
+        nexttile %plot rho
+        pcolor(x,y,rho), shading interp, axis equal tight;
+        title('\rho')
+        colorbar
+        lim = caxis;
+        caxis(lim);
+
+        nexttile %plot Schlieren Photography [S(x,y)]
+        pcolor(x,y,S), colormap(gray),shading interp, axis equal tight;
+        title('Numerical Schlieren Image');
+        colorbar
+        caxis([0.1 0.8]);
+        colormap(gray);
+        lim = caxis;
+        caxis(lim);
+
+        nexttile %plot u
+        pcolor(x,y,u), colormap(parula), shading interp, axis equal tight;
+        title('u')
+        colorbar
+        lim = caxis;
+        caxis(lim);
+
+        nexttile %plot v
+        pcolor(x,y,v), shading interp, axis equal tight;
+        title('v')
+        colorbar
+        lim = caxis;
+        caxis(lim);
+
+        nexttile %plot Et
+        pcolor(x,y,Et), shading interp, axis equal tight;
+        title('Et')
+        colorbar
+        lim = caxis;
+        caxis(lim);
+
+        nexttile %plot p
+        pcolor(x,y,p), shading interp, axis equal tight;
+        title('p')
+        colorbar
+        lim = caxis;
+        caxis(lim);
+
+        nexttile %plot T
+        pcolor(x,y,T), shading interp, axis equal tight;
+        title('T')
+        colorbar
+        lim = caxis;
+        caxis(lim);
+
+        drawnow   
+
+    end
+    
+    count=count+1;
+% convergence plot
+    % if mod(count, 50) == 0
+    %     figure(2);tiledlayout(2,2);
+    %     nexttile;
+    %     semilogy(1:count, convergence_u, 'r-');
+    %     nexttile;
+    %     plot(1:count, convergence_u, 'r-');
+    %     title('Convergence of velocity');
+    %     xlabel('Iteration'); ylabel('Residual');
+    %     nexttile;
+    %     semilogy(1:count, convergence_T, 'r-');
+    %     nexttile;
+    %     plot(1:count, convergence_T, 'r-');
+    %     title('Convergence of temperature');
+    %     xlabel('Iteration'); ylabel('Residual');
+    %     drawnow;
+    % end
+
+end
+
+    %calculate Mach Angle
+    M_theta = asin(1/M);
+    M_theta1 = asin(a0/max(u(1,:)));
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
     
 [gx,gy] = gradient(rho ,dx,dy);
 G       = hypot(gx,gy);
 
 % choose two x-rows where the shock is still straight
+<<<<<<< HEAD
 iA =  round(0.05*nx);            % 5 % of plate length
 iB =  round(0.2*nx);            % 20 % of plate length
+=======
+iA =  round(0.05*nx);            % 5% of plate length
+iB =  round(0.2*nx);            % 20% of plate length
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 
 % in each row pick the strongest gradient ABOVE the boundary layer
 jA = find(G(iA,5:end)==max(G(iA,5:end)),1,'first') + 4;   % skip first 4 y-cells
@@ -295,13 +474,21 @@ xB = x(iB,jB);   yB = y(iB,jB);
 M_theta2 = atan( (yB - yA) / (xB - xA) );
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 fprintf('Theoretical θ = %.2f°\n', rad2deg(M_theta));
 fprintf('Top-edge estimate θ = %.2f°\n', rad2deg(M_theta1));
 fprintf('Numerical slope-based θ = %.2f°\n', rad2deg(M_theta2));
 
+<<<<<<< HEAD
 
 
 % FUNCTIONS
+=======
+%% FUNCTIONS
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 
 function U = prim2cons(rho,u,v,T,cv)
 
@@ -316,7 +503,10 @@ U(:,:,4)=rho.*(e+(u.^2+v.^2)/2);
 
 end
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 function [rho,u,v,T,p,e,Et] = cons2prim(U,R,cv)
 
 rho=squeeze(U(:,:,1));
@@ -329,8 +519,11 @@ Et=squeeze(U(:,:,4));
 
 end
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 function mu = sutherland(T)
 
 mu0=1.735e-5;
@@ -372,11 +565,14 @@ function sol = ddx_bwd(f,dx)
 end
 
 
+<<<<<<< HEAD
 
 
 
 
 
+=======
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 function sol = ddx_central(f,dx)
     [x,y]=size(f);
     sol=zeros(x,y);
@@ -394,11 +590,14 @@ function sol = ddx_central(f,dx)
 end
 
 
+<<<<<<< HEAD
 
 
 
 
 
+=======
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 function sol = ddx_fwd(f,dx)
     if ndims(f)==3
         [x,y,n]=size(f);
@@ -430,12 +629,15 @@ function sol = ddx_fwd(f,dx)
 end
 
 
+<<<<<<< HEAD
 
 
 
 
 
 
+=======
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 function sol = ddy_central(f,dy)
     [x,y]=size(f);
     sol=zeros(x,y);
@@ -453,6 +655,7 @@ function sol = ddy_central(f,dy)
 end
 
 
+<<<<<<< HEAD
 
 
 
@@ -460,6 +663,8 @@ end
 
 
 
+=======
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 function sol = ddy_fwd(f,dy)
     if ndims(f)==3
         [x,y,n]=size(f);
@@ -491,6 +696,7 @@ function sol = ddy_fwd(f,dy)
 end
 
 
+<<<<<<< HEAD
 
 
 
@@ -499,6 +705,8 @@ end
 
 
 
+=======
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed
 function sol = ddy_bwd(f,dy)
     if ndims(f)==3
         [x,y,n]=size(f);
@@ -527,4 +735,8 @@ function sol = ddy_bwd(f,dy)
             end
         end
     end
+<<<<<<< HEAD
 end
+=======
+end
+>>>>>>> be7848fafb9be178045d9cf0e42aa34e5b9b94ed

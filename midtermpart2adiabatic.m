@@ -82,7 +82,7 @@ while count<1500
     %For F, qdoty gets backward in y
 
     qdoty=-k.*ddy_bwd(T,dy);
-    %qdoty(:,1)=0;  %adiabatic wall condition
+    qdoty(:,1)=0;  %adiabatic wall condition
 
     F(:,:,1)=rho.*v;
     F(:,:,2)=rho.*u.*v-tauxy;
@@ -112,7 +112,7 @@ while count<1500
     %at the wall
     u(:,1)=0;
     v(:,1)=0;
-    T(:,1)=T(:,2);
+    T(:,1)=T(:,2); %adiabatic wall condition
     p(:,1)=2*p(:,2)-p(:,3);
 
     %at the leading edge
@@ -158,7 +158,7 @@ while count<1500
     %For Fbar, qdoty gets forward in y
 
     qdoty=-k.*ddy_fwd(T,dy);
-    %qdoty(:,1)=0; %adiabatic wall condition
+    qdoty(:,1)=0; %adiabatic wall condition
 
     F(:,:,1)=rho.*v;
     F(:,:,2)=rho.*u.*v-tauxy;
@@ -187,7 +187,7 @@ while count<1500
     %at the wall
     u(:,1)=0;
     v(:,1)=0;
-    T(:,1)=T(:,2);
+    T(:,1)=T(:,2); %adiabatic wall condition
     p(:,1)=2*p(:,2)-p(:,3);
 
     %at the outflow
@@ -257,7 +257,7 @@ while count<1500
         title('T [K]')
         colormap(ax6,'hot');
         colorbar
-        caxis([290 490])
+        caxis([290 1000])
         drawnow
     end
     count=count+1;
@@ -268,231 +268,3 @@ plot(dt*(1:1500),convergence_T)
 title('Convergence for T')
 xlabel('Time [s]')
 ylabel('Residual')
-
-% FUNCTIONS
-
-function U = prim2cons(rho,u,v,T,cv)
-
-[nx,ny]=size(u);
-e=cv.*T;
-U=zeros(nx,ny,4);
-
-U(:,:,1)=rho;
-U(:,:,2)=rho.*u;
-U(:,:,3)=rho.*v;
-U(:,:,4)=rho.*(e+(u.^2+v.^2)/2);
-
-end
-
-
-function [rho,u,v,T,p,e,Et] = cons2prim(U,R,cv)
-
-rho=squeeze(U(:,:,1));
-u=squeeze(U(:,:,2))./rho;
-v=squeeze(U(:,:,3))./rho;
-T=(squeeze(U(:,:,4))./rho-(u.^2+v.^2)/2)/cv;
-e=cv*T;
-p=rho.*R.*T;
-Et=squeeze(U(:,:,4));
-
-end
-
-
-
-function mu = sutherland(T)
-
-mu0=1.735e-5;
-S1=110.4;
-T0=288.15;
-
-mu=mu0*(T/T0).^(3/2).*(T0+S1)./(T+S1);
-
-end
-
-function sol = ddx_bwd(f,dx)
-    if ndims(f)==3
-        [x,y,n]=size(f);
-        sol=zeros(x,y,n);
-        for k=1:n
-            for i=1:x
-                for j=1:y
-                    if i>1
-                        sol(i,j,k)=(f(i,j,k)-f(i-1,j,k))/dx;
-                    else
-                        sol(i,j,k)=(f(i+1,j,k)-f(i,j,k))/dx;
-                    end
-                end
-            end
-        end
-    else      
-        [x,y]=size(f);
-        sol=zeros(x,y);
-        for i=1:x
-            for j=1:y 
-                if i>1                       
-                    sol(i,j)=(f(i,j)-f(i-1,j))/dx;                    
-                else                       
-                    sol(i,j)=(f(i+1,j)-f(i,j))/dx;
-                end
-            end
-        end
-    end
-end
-
-
-
-
-
-
-
-function sol = ddx_central(f,dx)
-    [x,y]=size(f);
-    sol=zeros(x,y);
-    for i=1:x
-        for j=1:y
-            if i==1
-                sol(i,j)=(-3*f(i,j)+4*f(i+1,j)-f(i+2,j))/2/dx;
-            elseif i==x
-                sol(i,j)=(3*f(i,j)-4*f(i-1,j)+f(i-2,j))/2/dx;
-            else
-                sol(i,j)=(f(i+1,j)-f(i-1,j))/2/dx;
-            end
-        end
-    end
-end
-
-
-
-
-
-
-
-function sol = ddx_fwd(f,dx)
-    if ndims(f)==3
-        [x,y,n]=size(f);
-        sol=zeros(x,y,n);
-        for k=1:n
-            for i=1:x
-                for j=1:y
-                    if i<x
-                        sol(i,j,k)=(f(i+1,j,k)-f(i,j,k))/dx;
-                    else
-                        sol(i,j,k)=sol(i-1,j,k);
-                    end
-                end
-            end
-        end
-    else      
-        [x,y]=size(f);
-        sol=zeros(x,y); 
-        for i=1:x    
-            for j=1:y                
-                if i<x                        
-                    sol(i,j)=(f(i+1,j)-f(i,j))/dx;                    
-                else                        
-                    sol(i,j)=sol(i-1,j);                   
-                end                
-            end            
-        end
-    end
-end
-
-
-
-
-
-
-
-
-function sol = ddy_central(f,dy)
-    [x,y]=size(f);
-    sol=zeros(x,y);
-    for i=1:x
-        for j=1:y
-            if j==1
-                sol(i,j)=(-3*f(i,j)+4*f(i,j+1)-f(i,j+2))/2/dy;
-            elseif j==y
-                sol(i,j)=(3*f(i,j)-4*f(i,j-1)+f(i,j-2))/2/dy;
-            else
-                sol(i,j)=(f(i,j+1)-f(i,j-1))/2/dy;
-            end
-        end
-    end
-end
-
-
-
-
-
-
-
-
-
-function sol = ddy_fwd(f,dy)
-    if ndims(f)==3
-        [x,y,n]=size(f);
-        sol=zeros(x,y,n);
-        for k=1:n
-            for i=1:x
-                for j=1:y
-                    if j<y
-                        sol(i,j,k)=(f(i,j+1,k)-f(i,j,k))/dy;
-                    else
-                        sol(i,j,k)=sol(i,j-1,k);
-                    end
-                end
-            end
-        end
-    else      
-        [x,y]=size(f);
-        sol=zeros(x,y); 
-        for i=1:x    
-            for j=1:y                
-                if j<y                        
-                    sol(i,j)=(f(i,j+1)-f(i,j))/dy;                    
-                else                        
-                    sol(i,j)=sol(i,j-1);                   
-                end                
-            end            
-        end
-    end
-end
-
-
-
-
-
-
-
-
-
-
-function sol = ddy_bwd(f,dy)
-    if ndims(f)==3
-        [x,y,n]=size(f);
-        sol=zeros(x,y,n);
-        for k=1:n
-            for i=1:x
-                for j=1:y
-                    if j>1
-                        sol(i,j,k)=(f(i,j,k)-f(i,j-1,k))/dy;
-                    else
-                        sol(i,j,k)=(f(i,j+1,k)-f(i,j,k))/dy;
-                    end
-                end
-            end
-        end
-    else      
-        [x,y]=size(f);
-        sol=zeros(x,y);
-        for i=1:x
-            for j=1:y 
-                if j>1                       
-                    sol(i,j)=(f(i,j)-f(i,j-1))/dy;                    
-                else                       
-                    sol(i,j)=(f(i,j+1)-f(i,j))/dy;
-                end
-            end
-        end
-    end
-end

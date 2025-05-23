@@ -519,7 +519,7 @@ for i = 1:length(x_plots)
     p_norm = p(x_plots(i),:)/p_max;
     p_adiabatic_norm = p_adiabatic(x_plots(i),:)/max(p_adiabatic(x_plots(i),1:end));
     plot(y(1,:),p_norm); title("Normalized Pressure Profile at x/L = " + x_L(i))
-    plot(y(1,:),p_adiabatic_norm); title("Normalized Temperature Profile at x/L = " + x_L(i))   
+    plot(y(1,:),p_adiabatic_norm); title("Normalized Pressure Profile at x/L = " + x_L(i))   
     ylabel('Normalized Pressure');xlabel('Position in Y')
     legend('Constant Wall Temperature','Adiabatic Wall');
 end

@@ -501,7 +501,8 @@ ylabel('Residual')
 
 % Midterm 2.3
 %plot T(y), p(y) @ x/L = 0.25, 0.50, 0.75
-x_plots = ceil([.25 .50 .75] * 75);
+x_L = [.25 .50 .75];
+x_plots = ceil( x_L * 75);
 figure; tiledlayout(3,2); hold on;
 
 for i = 1:length(x_plots)
@@ -509,16 +510,16 @@ for i = 1:length(x_plots)
     T_max = max(T(x_plots(i),1:end));
     T_norm = T(x_plots(i),:)/T_max;
     T_adiabatic_norm = T_adiabatic(x_plots(i),:)/max(T_adiabatic(x_plots(i),1:end));
-    plot(y(1,:),T_norm); title("Normalized Temperature Profile at x/L = " + x_plots(i))
-    plot(y(1,:),T_adiabatic_norm); title("Normalized Temperature Profile at x/L = " + x_plots(i))
+    plot(y(1,:),T_norm); title("Normalized Temperature Profile at x/L = " + x_L(i))
+    plot(y(1,:),T_adiabatic_norm); title("Normalized Temperature Profile at x/L = " + x_L(i))
     legend('Constant Wall Temperature','Adiabatic Wall');
     ylabel('Normalized Temperature');xlabel('Position in Y')
     nexttile; hold on;
     p_max = max(p(x_plots(i),1:end));
     p_norm = p(x_plots(i),:)/p_max;
     p_adiabatic_norm = p_adiabatic(x_plots(i),:)/max(p_adiabatic(x_plots(i),1:end));
-    plot(y(1,:),p_norm); title("Normalized Pressure Profile at x/L = " + x_plots(i))
-    plot(y(1,:),p_adiabatic_norm); title("Normalized Temperature Profile at x/L = " + x_plots(i))   
+    plot(y(1,:),p_norm); title("Normalized Pressure Profile at x/L = " + x_L(i))
+    plot(y(1,:),p_adiabatic_norm); title("Normalized Temperature Profile at x/L = " + x_L(i))   
     ylabel('Normalized Pressure');xlabel('Position in Y')
     legend('Constant Wall Temperature','Adiabatic Wall');
 end

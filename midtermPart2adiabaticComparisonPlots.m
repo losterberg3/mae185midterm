@@ -143,7 +143,7 @@ while count<1500
     %For Ebar, qdotx gets forward in x
 
     qdotx=-k.*ddx_fwd(T,dx);
-    qdotx(:,1) = 0;
+    qdotx(:,1) = 0; %adiabatic wall
 
     E(:,:,1)=rho.*u;
     E(:,:,2)=(rho.*(u.^2))+p-tauxx;
@@ -187,7 +187,6 @@ while count<1500
     %at the wall
     u(:,1)=0;
     v(:,1)=0;
-    %T(:,1)=Tinf; % Constant Wall Temp
     T(:,1)=T(:,2); % Adiabatic Wall
     p(:,1)=2*p(:,2)-p(:,3);
 
